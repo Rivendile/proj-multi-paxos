@@ -29,8 +29,8 @@ class Messenger(protocol.DatagramProtocol):
         
     def datagramReceived(self, packet, from_addr):
         try:
-            
-            message_type, data = packet.decode().split(' ', 1)
+            packet = packet.decode()
+            message_type, data = packet.split(' ', 1)
 
             if message_type == 'propose':
 
