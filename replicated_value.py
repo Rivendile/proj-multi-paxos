@@ -24,7 +24,7 @@ class BaseReplicatedValue (object):
         self.messenger = None
         self.network_uid = network_uid
         self.peers = peers            # list of peer network uids
-        self.quorum_size = len(peers) // 2 + 1
+        self.quorum_size = int(len(peers)/2) + 1
         self.state_file = state_file
         self.sm = sm
 
@@ -94,7 +94,7 @@ class BaseReplicatedValue (object):
         This is a key method that some of the mixin classes override in order
         to provide additional functionality when new values are proposed
         """
-        print('replicated value, propose_update', self.paxos.proposed_value, new_value)
+        # print('replicated value, propose_update', self.paxos.proposed_value, new_value)
         if self.paxos.proposed_value is None:
             self.paxos.propose_value(new_value)
 
