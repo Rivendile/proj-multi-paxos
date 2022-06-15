@@ -40,6 +40,8 @@ else:
 
 state_file = config.state_files[args.uid]
 
+if not os.path.exists(os.path.dirname(state_file)):
+    os.makedirs(os.path.dirname(state_file))
 
 r = ReplicatedValue(args.uid, config.peers.keys(), state_file)
 m = Messenger(args.uid, config.peers, r)
