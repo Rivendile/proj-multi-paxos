@@ -17,8 +17,11 @@ class PhxKVServicerImpl(PhxKVServicer):
         self.oPhxKV = PhxKV(oMynode, vecNodeList, sKVDBPath, sPaxosLogPath)
 
     def Init(self):
-        return self.oPhxKV.RunPaxos()
+        return self.oPhxKV.InitPaxos()
 
+    def Start(self):
+        return self.oPhxKV.RunPaxos()
+    
     def Put(self, request, context) -> PhxKVResponse:
         eStatus = self.oPhxKV.Put(request.key, request.value, request.version)
         oResponse = PhxKVResponse(ret=eStatus)

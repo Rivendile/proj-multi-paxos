@@ -9,6 +9,13 @@ service PhxKV {
   rpc Delete(PhxKVRequest) returns (PhxKVResponse) {}
 }
 
+message PhxValue {
+  string key     = 1;
+  bytes  value   = 2;
+  uint64 version = 3;
+  uint32 operator = 4;
+}
+
 message PhxKVRequest {
   string key     = 1;
   bytes  value   = 2;

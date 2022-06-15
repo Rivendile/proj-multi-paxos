@@ -20,15 +20,17 @@ parser.add_argument('--master', action='store_true',
                     help='If specified, a dedicated master will be used. If one server specifies this flag, all must')
 args = parser.parse_args()
 
-oKVServer = PhxKVServicerImpl(args.uid, config.peers, config.state_files[args.uid], args.master)
-ret = oKVServer.Init()
+oKVServicer = PhxKVServicerImpl(args.uid, config.peers, config.state_files[args.uid], args.master)
+ret = oKVServicer.Init()
 if ret != 0:
     logger.error("KV Service init failed")
     sys.exit(ret)
 logger.info("KV Service init success..............")
+oKVServicer.Start()
+logger.info("KV Service start success..............")
 
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-phxkv_pb2_grpc.add_PhxKVServicer_to_server(oKVServer, server)
+phxkv_pb2_grpc.add_PhxKVServicer_to_server(oKVServicer, server)
 server.add_insecure_port('[::]:{}'.format(config.grpc_ports[args.uid]))
 server.start()
 logger.info("Server started..............")

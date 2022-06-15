@@ -1,3 +1,4 @@
+from msvcrt import kbhit
 from kv_sm import KVSM
 import logging
 from replicated_value import BaseReplicatedValue
@@ -7,17 +8,33 @@ from sync_strategy import SimpleSynchronizationStrategyMixin
 from messenger import Messenger
 from utils.concurrent import PThread
 from twisted.internet import reactor
+from kv_enum import KVStatus, KVOperatorType
+from phxkv_pb2 import PhxValue
+from twisted.internet import reactor
 
 logger = logging.getLogger(__name__)
+
 
 class ReactorThread(PThread):
     def run(self):
         reactor.run()
-        
+
+
+def MakePaxosValue(sKey: str, sValue: str, iVersion: int, iOperator: int,
+                   eOp: KVOperatorType) -> PhxValue:
+    oPhxValue = PhxValue(
+        key=sKey,
+        value=sValue.encode(),
+        version=iVersion,
+        operator=int(eOp)
+    )
+    return oPhxValue.SerializeToString()
+
+
 class PhxKV(object):
-    def __init__(self, oMyNode, vecNodeList,
+    def __init__(self, oMyUid, vecNodeList,
                  sKVDBPath: str, sPaxosLogPath: str, bUseMasterStrategy: bool):
-        self.oMyNode = oMyNode
+        self.oMyUid = oMyUid
         self.vecNodeList = vecNodeList
         self.sKVDBPath = sKVDBPath
         self.sPaxosLogPath = sPaxosLogPath
@@ -28,7 +45,7 @@ class PhxKV(object):
         self.oMessager = None
         self.oReactorThread = ReactorThread()
 
-    def RunPaxos(self) -> int:
+    def InitPaxos(self) -> int:
         if not self.oKVSM.Init():
             return -1
         if self.bUseMasterStrategy:
@@ -43,8 +60,22 @@ class PhxKV(object):
                 '''
         self.oReplicatedValue = ReplicatedValue(self.oMyNode, self.vecNodeList.keys(), self.sPaxosLogPath, self.oKVSM)
         self.oMessager = Messenger(self.oMyNode, self.vecNodeList, self.oReplicatedValue)
-        self.oReactorThread.start()
         return 0
 
-    def KVPropose(self, sKey: str, sPaxosValue: str) -> int:
-        iGroupIdx = self.GetGroupIdx(sKey)
+    def RunPaxos(self):
+        self.oReactorThread.start()
+
+    def KVPropose(self, sPaxosValue: str) -> int:
+        self.oReplicatedValue.propose_update(sPaxosValue)
+
+    def Put(self, sKey: str, sValue: str, iVersion: int) -> KVStatus:
+        sPaxosValue = MakePaxosValue(sKey, sValue, iVersion, KVOperatorType.WRITE)
+        self.KVPropose(sPaxosValue)
+
+    def GetLocal(self, sKey: str) -> KVStatus:
+        eStatus, sValue, iVersion = self.oKVSM.Get(sKey)
+        return eStatus, sValue, iVersion
+
+    def Delete(self, sKey: str, iVersion: int) -> KVStatus:
+        sPaxosValue = MakePaxosValue(sKey, "", iVersion, KVOperatorType.DELETE)
+        self.KVPropose(sPaxosValue)
