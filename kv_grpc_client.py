@@ -10,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 class PhxKVClient(object):
     def __init__(self, oChannel: grpc.Channel):
-        self.oStub = phxkv_pb2_grpc.PhxKVServerStub(oChannel)
+        self.oStub = phxkv_pb2_grpc.PhxKVStub(oChannel)
 
-    def Put(self, sKey: str, sValue: str, iVersion: int) -> KVStatus:
-        oRequest = phxkv_pb2.PhxKVRequest(key=sKey, value=sValue, version=iVersion)
-        oRequest.opeartor = KVOperatorType.WRITE
+    def Put(self, sKey: str, bValue: bytes) -> KVStatus:
+        oRequest = phxkv_pb2.PhxKVRequest(key=sKey, value=bValue)
+        oRequest.operator = int(KVOperatorType.WRITE)
         try:
             oResponse = self.oStub.Put(oRequest)
         except grpc.RpcError as e:
@@ -22,36 +22,29 @@ class PhxKVClient(object):
             return KVStatus.FAIL
         return oResponse.ret
 
-    def GetLocal(self, sKey: str) -> Tuple[KVStatus, bytes, int]:
+    def GetLocal(self, sKey: str) -> Tuple[KVStatus, bytes]:
         oRequest = phxkv_pb2.PhxKVRequest(key=sKey)
-        oRequest.operator = KVOperatorType.READ
+        oRequest.operator = int(KVOperatorType.READ)
         try:
             oResponse = self.oStub.GetLocal(oRequest)
         except grpc.RpcError as e:
             logger.error(f"RpcError {e}")
             return KVStatus.FAIL, None, None
-        return oResponse.ret, oResponse.data.value, oResponse.data.version
+        return oResponse.ret, oResponse.value
 
-    def GetLocal(self, sKey: str, iMinVersion: int) -> Tuple[KVStatus, bytes, int]:
-        eStatus, sValue, iVersion = self.GetLocal(sKey)
-        if eStatus == KVStatus.SUCC:
-            if iVersion is not None and iVersion < iMinVersion:
-                eStatus = KVStatus.VERSION_NOTEXIST
-        return eStatus, sValue, iVersion
-
-    def GetGlobal(self, sKey: str) -> Tuple[KVStatus, bytes, int]:
+    def GetGlobal(self, sKey: str) -> Tuple[KVStatus, bytes]:
         oRequest = phxkv_pb2.PhxKVRequest(key=sKey)
-        oRequest.operator = KVOperatorType.READ
+        oRequest.operator = int(KVOperatorType.READ)
         try:
             oResponse = self.oStub.GetGlobal(oRequest)
         except grpc.RpcError as e:
             logger.error(f"RpcError {e}")
             return KVStatus.FAIL, None, None
-        return oResponse.ret, oResponse.data.value, oResponse.data.version
+        return oResponse.ret, oResponse.value
 
-    def Delete(self, sKey: str, iVersion: int) -> KVStatus:
-        oRequest = phxkv_pb2.PhxKVRequest(key=sKey, version=iVersion)
-        oRequest.operator = KVOperatorType.DELETE
+    def Delete(self, sKey: str) -> KVStatus:
+        oRequest = phxkv_pb2.PhxKVRequest(key=sKey)
+        oRequest.operator = int(KVOperatorType.DELETE)
         try:
             oResponse = self.oStub.Delete(oRequest)
         except grpc.RpcError as e:

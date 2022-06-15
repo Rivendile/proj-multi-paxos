@@ -1,16 +1,14 @@
-from enum import Enum
+from enum import IntEnum
 
-class KVOperatorType(Enum):
+class KVOperatorType(IntEnum):
     READ = 1
     WRITE = 2
     DELETE = 3
     
-class KVStatus(Enum):
+class KVStatus(IntEnum):
     SUCC = 0
     FAIL = -1
     KEY_NOTEXIST = 1
-    VERSION_CONFLICT = -11
-    VERSION_NOTEXIST = -12
-    
-    
-NULL_VERSION = 0
+
+if __name__ == "__main__":
+    print(int(KVOperatorType.READ))

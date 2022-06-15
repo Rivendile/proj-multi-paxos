@@ -47,4 +47,3 @@ r = ReplicatedValue(args.uid, config.peers.keys(), state_file)
 m = Messenger(args.uid, config.peers, r)
 
 reactor.run()
-
