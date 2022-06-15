@@ -1,5 +1,6 @@
 # Mult-Paxos
-This repository contains the Implementation for the graduate lesson *Concept and design of Distributed System* (2022 Spring, advised by Zhi Yang) in Peking University. We implement the Paxos, the Multi-Paxos Algorithm and a distributed database based on our Paxos consensus protocol.
+🏮 This repository contains the Implementation for the graduate lesson *Concept and design of Distributed System* (2022 Spring, advised by Zhi Yang) in Peking University. 
+We implement the Paxos, the Multi-Paxos Algorithm and a distributed database based on our Paxos consensus protocol.
 ## Getting Start
 - Setup the conda environment.
 ```bash
