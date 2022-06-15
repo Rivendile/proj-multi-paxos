@@ -11,7 +11,7 @@ from kv_client import KVClient, KVClientRet
 import logging
 from typing import Tuple
 from phxkv_pb2 import PhxValue
-from kv_enum import KVOperatorType
+from kv_enum import KVOperatorType, KVStatus
 
 logger = logging.getLogger(__name__)
 
@@ -28,20 +28,25 @@ class KVSM(StateMachine):
             return False
         return True
     
-    def Get(self, sKey: str) -> Tuple[KVClientRet, bytes, int]:
-        return self.oKVClient.Get(sKey)
+    def Get(self, sKey: str) -> Tuple[KVStatus, bytes]:
+        oRet, bValue = self.oKVClient.Get(sKey)
+        if oRet == KVClientRet.OK:
+            return KVStatus.SUCC, bValue
+        elif oRet == KVClientRet.KEY_NOTEXIST:
+            return KVStatus.KEY_NOTEXIST, bValue
+        elif oRet == KVClientRet.SYS_FAIL:
+            return KVStatus.SYS_FAIL, bValue
     
     def Execute(self, iInstanceIdx: int, sPaxosValue: str):
         oPhxValue = PhxValue()
-        oPhxValue.ParseFromString(sPaxosValue)
+        oPhxValue.ParseFromString(sPaxosValue.encode())
         sKey = oPhxValue.key
         bValue = oPhxValue.value
-        iVersion = oPhxValue.version
-        eOp = KVOperatorType(oPhxValue.op)
+        eOp = KVOperatorType(oPhxValue.operator)
         if eOp == KVOperatorType.READ:
             self.oKVClient.Get(sKey)
         elif eOp == KVOperatorType.WRITE:
-            self.oKVClient.Set(sKey, bValue, iVersion)
+            self.oKVClient.Set(sKey, bValue)
         elif eOp == KVOperatorType.DELETE:
-            self.oKVClient.Del(sKey, iVersion)
+            self.oKVClient.Del(sKey)
         

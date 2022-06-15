@@ -5,3 +5,4 @@ phxkv_pb2.py
 phxkv_pb2_grpc.py
 state/
 db/
+scripts/

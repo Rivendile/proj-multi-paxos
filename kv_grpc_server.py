@@ -8,36 +8,34 @@ logger = logging.getLogger(__name__)
 
 
 class PhxKVServicerImpl(PhxKVServicer):
-    def __init__(self,
-                 oMynode,
-                 vecNodeList,
-                 sKVDBPath: str,
-                 sPaxosLogPath: str):
+    def __init__(
+        self,
+        oMyUid,
+        vecNodeList,
+        sKVDBPath: str,
+        sPaxosLogPath: str,
+        bUseMasterStrategy: bool,
+    ):
         super(PhxKVServicerImpl, self).__init__()
-        self.oPhxKV = PhxKV(oMynode, vecNodeList, sKVDBPath, sPaxosLogPath)
+        self.oPhxKV = PhxKV(
+            oMyUid, vecNodeList, sKVDBPath, sPaxosLogPath, bUseMasterStrategy
+        )
 
     def Init(self):
         return self.oPhxKV.InitPaxos()
 
-    def Start(self):
-        return self.oPhxKV.RunPaxos()
-    
     def Put(self, request, context) -> PhxKVResponse:
-        eStatus = self.oPhxKV.Put(request.key, request.value, request.version)
+        eStatus = self.oPhxKV.Put(request.key, request.value)
         oResponse = PhxKVResponse(ret=eStatus)
-        logging.info(f"ret {eStatus}, key {request.key}, value {request.value}, version {request.version}")
+        logging.info(f"ret {eStatus}, key {request.key}, value {request.value}")
         return oResponse
 
     def GetLocal(self, request, context) -> PhxKVResponse:
-        eStatus, sValue, iVersion = self.oPhxKV.GetLocal(request.key)
-        oResponse = PhxKVResponse(ret=eStatus)
-        if eStatus == KVStatus.SUCC:
-            oResponse.data.value = sValue
-            oResponse.data.version = iVersion
-        elif eStatus == KVStatus.KEY_NOTEXIST:
-            oResponse.data.is_deleted = True
-            oResponse.data.version = iVersion
-        logging.info(f"ret {eStatus}, key {request.key}, value {sValue}, version {iVersion}")
+        eStatus, bValue = self.oPhxKV.GetLocal(request.key)
+        logging.info(
+            f"ret {eStatus}, key {request.key}, value {bValue}"
+        )
+        oResponse = PhxKVResponse(ret=eStatus, value=bValue)
         return oResponse
 
     def GetGlobal(self, request, context) -> PhxKVResponse:
@@ -45,7 +43,7 @@ class PhxKVServicerImpl(PhxKVServicer):
         return self.GetLocal(request, context)
 
     def Delete(self, request, context) -> PhxKVResponse:
-        eStatus = self.oPhxKV.Delete(request.key, request.version)
+        eStatus = self.oPhxKV.Delete(request.key)
         oResponse = PhxKVResponse(ret=eStatus)
-        logging.info(f"ret {eStatus}, key {request.key}, version {request.version}")
+        logging.info(f"ret {eStatus}, key {request.key}")
         return oResponse

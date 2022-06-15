@@ -104,7 +104,8 @@ class BaseReplicatedValue (object):
         self.paxos = PaxosInstance(self.network_uid, self.quorum_size, None, None, None)
         if self.sm is not None:
             self.sm.Execute(new_instance_number, new_current_value)
-        print('UPDATED: ', new_instance_number, new_current_value)
+        # print('UPDATED: ', new_instance_number, new_current_value)
+        print(f"UPDATED: {new_instance_number}")
 
     def send_prepare(self, proposal_id):
         for uid in self.peers:
