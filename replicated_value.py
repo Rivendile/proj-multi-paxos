@@ -24,7 +24,7 @@ class BaseReplicatedValue (object):
         self.messenger = None
         self.network_uid = network_uid
         self.peers = peers            # list of peer network uids
-        self.quorum_size = len(peers)/2 + 1
+        self.quorum_size = len(peers) // 2 + 1
         self.state_file = state_file
         self.sm = sm
 
