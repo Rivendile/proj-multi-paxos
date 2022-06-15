@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package phxkv;
+
+service PhxKV {
+  rpc Put(PhxKVRequest) returns (PhxKVResponse) {}
+  rpc GetLocal(PhxKVRequest) returns (PhxKVResponse) {}
+  rpc GetGlobal(PhxKVRequest) returns (PhxKVResponse) {}
+  rpc Delete(PhxKVRequest) returns (PhxKVResponse) {}
+}
+
+message PhxKVRequest {
+  string key     = 1;
+  bytes  value   = 2;
+  uint64 version = 3;
+  uint32 operator = 4;
+}
+
+message PhxKVResponse {
+  PhxKVData data = 1;
+  int32     ret  = 2;
+}
+
+message PhxKVData {
+  bytes  value      = 1;
+  uint64 version    = 2;
+  bool   is_deleted = 3;
+}
