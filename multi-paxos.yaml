@@ -1,0 +1,48 @@
+name: multi-paxos
+channels:
+  - anaconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=5.1=1_gnu
+  - appdirs=1.4.4=pyhd3eb1b0_0
+  - attrs=21.4.0=pyhd3eb1b0_0
+  - automat=20.2.0=py_0
+  - bcrypt=3.2.0=py39he8ac12f_0
+  - ca-certificates=2022.4.26=h06a4308_0
+  - certifi=2021.10.8=py39h06a4308_2
+  - cffi=1.15.0=py39hd667e15_1
+  - constantly=15.1.0=pyh2b92418_0
+  - cryptography=36.0.0=py39h9ce1e76_0
+  - hyperlink=21.0.0=pyhd3eb1b0_0
+  - idna=3.3=pyhd3eb1b0_0
+  - incremental=21.3.0=pyhd3eb1b0_0
+  - ld_impl_linux-64=2.38=h1181459_1
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=11.2.0=h1234567_1
+  - libgomp=11.2.0=h1234567_1
+  - libstdcxx-ng=11.2.0=h1234567_1
+  - ncurses=6.3=h7f8727e_2
+  - openssl=1.1.1o=h7f8727e_0
+  - pip=21.2.4=py39h06a4308_0
+  - pyasn1=0.4.8=pyhd3eb1b0_0
+  - pyasn1-modules=0.2.8=py_0
+  - pycparser=2.21=pyhd3eb1b0_0
+  - pyhamcrest=2.0.2=pyhd3eb1b0_2
+  - pyopenssl=22.0.0=pyhd3eb1b0_0
+  - python=3.9.12=h12debd9_1
+  - readline=8.1.2=h7f8727e_1
+  - service_identity=18.1.0=pyhd3eb1b0_1
+  - setuptools=61.2.0=py39h06a4308_0
+  - six=1.16.0=pyhd3eb1b0_1
+  - sqlite=3.38.3=hc218d9a_0
+  - tk=8.6.12=h1ccaba5_0
+  - twisted=22.2.0=py39h7f8727e_0
+  - typing_extensions=4.1.1=pyh06a4308_0
+  - tzdata=2022a=hda174b7_0
+  - wheel=0.37.1=pyhd3eb1b0_0
+  - xz=5.2.5=h7f8727e_1
+  - zlib=1.2.12=h7f8727e_2
+  - zope=1.0=py39h06a4308_1
+  - zope.interface=5.4.0=py39h7f8727e_0
+prefix: /home/yihaozhao/anaconda3/envs/multi-paxos
