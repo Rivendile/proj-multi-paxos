@@ -94,7 +94,7 @@ class BaseReplicatedValue (object):
         This is a key method that some of the mixin classes override in order
         to provide additional functionality when new values are proposed
         """
-        print('replicated value, propose_update', self.paxos.proposed_value, new_value)
+        # print('replicated value, propose_update', self.paxos.proposed_value, new_value)
         if self.paxos.proposed_value is None:
             self.paxos.propose_value(new_value)
 

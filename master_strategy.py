@@ -61,7 +61,7 @@ class DedicatedMasterStrategyMixin (object):
         All values are tuples. If the left value is set, it's an attempt to gain master status.
         If the right value is set, it's an application-level value
         """
-        print('master propose_update: ', new_value, application_level)
+        # print('master propose_update: ', new_value, application_level)
         if application_level:
             if self.master_uid == self.network_uid:
                 super(DedicatedMasterStrategyMixin,self).propose_update( json.dumps( [None,new_value] ) )

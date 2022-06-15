@@ -151,7 +151,7 @@ class Proposer (MessageHandler):
         a previous proposal value. If the node additionally believes itself to be
         the current leader, an Accept message will be returned
         '''
-        print('proposer propose_value', self.proposed_value, value, self.leader)
+        # print('proposer propose_value', self.proposed_value, value, self.leader)
         if self.proposed_value is None:
             self.proposed_value = value
             
@@ -173,7 +173,7 @@ class Proposer (MessageHandler):
         self.proposal_id         = ProposalID(self.highest_proposal_id.number + 1, self.network_uid)
         self.highest_proposal_id = self.proposal_id
         self.current_prepare_msg = Prepare(self.network_uid, self.proposal_id)
-        print('paxos, prepare', self.current_prepare_msg)
+        # print('paxos, prepare', self.current_prepare_msg)
 
         return self.current_prepare_msg
 
@@ -197,11 +197,11 @@ class Proposer (MessageHandler):
         a quorum.
         '''
         self.observe_proposal( msg.promised_proposal_id )
-        print('proposer receive_nack', msg.proposal_id, self.proposal_id, self.nacks_received)
+        # print('proposer receive_nack', msg.proposal_id, self.proposal_id, self.nacks_received)
         
         if msg.proposal_id == self.proposal_id and self.nacks_received is not None:
             self.nacks_received.add( msg.from_uid )
-            print('proposer receive_nack', msg.from_uid, len(self.nacks_received), self.quorum_size)
+            # print('proposer receive_nack', msg.from_uid, len(self.nacks_received), self.quorum_size)
 
             if len(self.nacks_received) == self.quorum_size:
                 return self.prepare() # Lost leadership or failed to acquire it
