@@ -1,6 +1,5 @@
 # Mult-Paxos
 🏮 This repository contains the Implementation for the graduate lesson *Concept and design of Distributed System* (2022 Spring, advised by Zhi Yang) in Peking University. 
-We implement the Paxos, the Multi-Paxos Algorithm and a distributed database based on our Paxos consensus protocol.
 ## Getting Start
 - Setup the conda environment.
 ```bash
@@ -13,8 +12,8 @@ python -m grpc_tools.protoc -I ./ --python_out=./ --grpc_python_out=. ./phxkv.pr
 If you finish running this command without error, you will see two new files `phxkv_pb2_grpc.py` and `phxkv_pb2.py` in the current directory.
 ## Usage
 
+We implement the Multi-Paxos Algorithm and a distributed database based on our Paxos consensus protocol.
 ### Echo Usage
-
 ```bash
 # Running the server
 # Without master leases:
@@ -25,9 +24,7 @@ python server.py --master A|B|C
 # Running the client
 python client.py A|B|C <value>
 ```
-
 ### Paxos-based Distributed Database
-
 - Setup the server A, B and C.
 ```bash
 $ python kv_grpc_server_main.py --help
