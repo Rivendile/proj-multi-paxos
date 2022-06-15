@@ -197,9 +197,11 @@ class Proposer (MessageHandler):
         a quorum.
         '''
         self.observe_proposal( msg.promised_proposal_id )
+        print('proposer receive_nack', msg.proposal_id, self.proposal_id, self.nacks_received)
         
         if msg.proposal_id == self.proposal_id and self.nacks_received is not None:
             self.nacks_received.add( msg.from_uid )
+            print('proposer receive_nack', msg.from_uid, len(self.nacks_received), self.quorum_size)
 
             if len(self.nacks_received) == self.quorum_size:
                 return self.prepare() # Lost leadership or failed to acquire it
@@ -319,7 +321,7 @@ class Learner (MessageHandler):
             
         last_pn = self.acceptors.get(msg.from_uid)
 
-        if msg.proposal_id <= last_pn:
+        if last_pn==None or msg.proposal_id <= last_pn:
             return # Old message
 
         self.acceptors[ msg.from_uid ] = msg.proposal_id
