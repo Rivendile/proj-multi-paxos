@@ -7,11 +7,13 @@
 # Last Modified By  : Jing Mai <jingmai@pku.edu.cn>
 
 from sm import StateMachine
-from kv_client import KVClient
+from kv_client import KVClient, KVClientRet
 import logging
+from typing import Tuple
+from phxkv_pb2 import PhxValue
+from kv_enum import KVOperatorType
 
 logger = logging.getLogger(__name__)
-
 
 class KVSM(StateMachine):
     def __init__(self, sDBPath: str):
@@ -25,6 +27,21 @@ class KVSM(StateMachine):
             logger.error(f"KVClient.Init fail, db_path {self.sDBPath}")
             return False
         return True
-
-    def Execute(self, iInstanceIdx: int, sPaxosValue: str) -> bool:
-        pass
+    
+    def Get(self, sKey: str) -> Tuple[KVClientRet, bytes, int]:
+        return self.oKVClient.Get(sKey)
+    
+    def Execute(self, iInstanceIdx: int, sPaxosValue: str):
+        oPhxValue = PhxValue()
+        oPhxValue.ParseFromString(sPaxosValue)
+        sKey = oPhxValue.key
+        bValue = oPhxValue.value
+        iVersion = oPhxValue.version
+        eOp = KVOperatorType(oPhxValue.op)
+        if eOp == KVOperatorType.READ:
+            self.oKVClient.Get(sKey)
+        elif eOp == KVOperatorType.WRITE:
+            self.oKVClient.Set(sKey, bValue, iVersion)
+        elif eOp == KVOperatorType.DELETE:
+            self.oKVClient.Del(sKey, iVersion)
+        
