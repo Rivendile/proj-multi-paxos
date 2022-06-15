@@ -321,7 +321,7 @@ class Learner (MessageHandler):
             
         last_pn = self.acceptors.get(msg.from_uid)
 
-        if last_pn==None or msg.proposal_id <= last_pn:
+        if last_pn is not None and msg.proposal_id <= last_pn:
             return # Old message
 
         self.acceptors[ msg.from_uid ] = msg.proposal_id

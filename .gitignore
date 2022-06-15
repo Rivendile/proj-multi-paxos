@@ -1,4 +1,6 @@
 __pycache__/
 .vscode/
-
 *.json
+phxkv_pb2.py
+phxkv_pb2_grpc.py
+state/
