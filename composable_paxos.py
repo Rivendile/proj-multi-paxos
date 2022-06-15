@@ -137,14 +137,12 @@ class Proposer (MessageHandler):
     current_prepare_msg  = None
     current_accept_msg   = None
 
-    
     def __init__(self, network_uid, quorum_size):
         self.network_uid         = network_uid
         self.quorum_size         = quorum_size
         self.proposal_id         = ProposalID(0, network_uid)
         self.highest_proposal_id = ProposalID(0, network_uid)
 
-    
     def propose_value(self, value):
         '''
         Sets the proposal value for this node iff this node is not already aware of
@@ -158,7 +156,6 @@ class Proposer (MessageHandler):
             if self.leader:
                 self.current_accept_msg = Accept(self.network_uid, self.proposal_id, value)
                 return self.current_accept_msg
-
 
     def prepare(self):
         '''
@@ -176,8 +173,7 @@ class Proposer (MessageHandler):
         # print('paxos, prepare', self.current_prepare_msg)
 
         return self.current_prepare_msg
-
-    
+  
     def observe_proposal(self, proposal_id):
         '''
         Optional method used to update the proposal counter as proposals are
@@ -189,8 +185,7 @@ class Proposer (MessageHandler):
         '''
         if (proposal_id!=None and self.highest_proposal_id==None) or (proposal_id!=None and self.highest_proposal_id!=None and proposal_id > self.highest_proposal_id):
             self.highest_proposal_id = proposal_id
-
-            
+         
     def receive_nack(self, msg):
         '''
         Returns a new Prepare message if the number of Nacks received reaches
@@ -205,7 +200,6 @@ class Proposer (MessageHandler):
 
             if len(self.nacks_received) == self.quorum_size:
                 return self.prepare() # Lost leadership or failed to acquire it
-
 
     def receive_promise(self, msg):
         '''
@@ -253,8 +247,7 @@ class Acceptor (MessageHandler):
         self.promised_id    = promised_id
         self.accepted_id    = accepted_id
         self.accepted_value = accepted_value
-
-        
+     
     def receive_prepare(self, msg):
         '''
         Returns either a Promise or a Nack in response. The Acceptor's state must be persisted to disk
@@ -265,8 +258,7 @@ class Acceptor (MessageHandler):
             return Promise(self.network_uid, msg.from_uid, self.promised_id, self.accepted_id, self.accepted_value)
         else:
             return Nack(self.network_uid, msg.from_uid, msg.proposal_id, self.promised_id)
-
-                    
+                   
     def receive_accept(self, msg):
         '''
         Returns either an Accepted or Nack message in response. The Acceptor's state must be persisted
@@ -288,6 +280,7 @@ class Learner (MessageHandler):
     This class listens to Accepted messages, determines when the final value is
     selected, and tracks which peers have accepted the final value.
     '''
+
     class ProposalStatus (object):
         __slots__ = ['accept_count', 'retain_count', 'acceptors', 'value']
         def __init__(self, value):
@@ -295,8 +288,7 @@ class Learner (MessageHandler):
             self.retain_count = 0
             self.acceptors    = set()
             self.value        = value
-
-            
+          
     def __init__(self, network_uid, quorum_size):
         self.network_uid       = network_uid
         self.quorum_size       = quorum_size
@@ -305,8 +297,7 @@ class Learner (MessageHandler):
         self.final_value       = None
         self.final_acceptors   = None   # Will be a set of acceptor UIDs once the final value is chosen
         self.final_proposal_id = None
-
-        
+      
     def receive_accepted(self, msg):
         '''
         Called when an Accepted message is received from an acceptor. Once the final value

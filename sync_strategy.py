@@ -25,7 +25,6 @@ class SimpleSynchronizationStrategyMixin (object):
         if instance_number < self.instance_number:
             self.messenger.send_catchup(from_uid, self.instance_number, self.current_value)
 
-
     def receive_catchup(self, from_uid, instance_number, current_value):
         if instance_number > self.instance_number:
             print('SYNCHRONIZED: ', instance_number, current_value)

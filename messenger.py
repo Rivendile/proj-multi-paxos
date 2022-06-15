@@ -21,12 +21,10 @@ class Messenger(protocol.DatagramProtocol):
             self.addrs[v] = k
 
         reactor.listenUDP( peer_addresses[uid][1], self )
-
         
     def startProtocol(self):
         self.replicated_val.set_messenger(self)
-
-        
+      
     def datagramReceived(self, packet, from_addr):
         try:
             packet = packet.decode()
@@ -59,13 +57,11 @@ class Messenger(protocol.DatagramProtocol):
             print('Error processing packet: ', packet)
             import traceback
             traceback.print_exc()
-            
-
+        
     def _send(self, to_uid, message_type, **kwargs):
         msg = '{0} {1}'.format(message_type, json.dumps(kwargs))
         print('snd', to_uid, ':', msg)
         self.transport.write(msg.encode(), self.addrs[to_uid])
-
 
     def send_sync_request(self, peer_uid, instance_number):
         self._send(peer_uid, 'sync_request', instance_number=instance_number)

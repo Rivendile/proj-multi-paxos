@@ -32,7 +32,6 @@ class DedicatedMasterStrategyMixin (object):
             
         self.lease_expiry = reactor.callLater(self.lease_window, self.lease_expired)
 
-        
     def update_lease(self, master_uid):
         self.master_uid = master_uid
 
@@ -46,7 +45,6 @@ class DedicatedMasterStrategyMixin (object):
                 reactor.callLater(renew_delay, lambda : self.propose_update(self.network_uid, False))
             else:
                 self.propose_update(self.network_uid, False)
-
 
     def lease_expired(self):
         self.master_uid = None
