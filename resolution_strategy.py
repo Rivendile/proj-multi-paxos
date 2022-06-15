@@ -62,6 +62,7 @@ class ExponentialBackoffResolutionStrategyMixin (object):
 
         
     def propose_update(self, new_value):
+        print('resolution propose_update', new_value)
         super(ExponentialBackoffResolutionStrategyMixin,self).propose_update(new_value)
         self.drive_to_resolution()
 

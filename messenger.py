@@ -33,7 +33,7 @@ class Messenger(protocol.DatagramProtocol):
             message_type, data = packet.split(' ', 1)
 
             if message_type == 'propose':
-
+                print('messenger datagramReceived', message_type, packet, from_addr)
                 self.replicated_val.propose_update( data )
 
             else:

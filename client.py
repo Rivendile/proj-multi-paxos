@@ -18,7 +18,7 @@ class ClientProtocol(protocol.DatagramProtocol):
         self.new_value = new_value
 
     def startProtocol(self):
-        self.transport.write('propose {0}'.format(self.new_value), self.addr)
+        self.transport.write(('propose {0}'.format(self.new_value)).encode(), self.addr)
         reactor.stop()
 
 

@@ -151,6 +151,7 @@ class Proposer (MessageHandler):
         a previous proposal value. If the node additionally believes itself to be
         the current leader, an Accept message will be returned
         '''
+        print('proposer propose_value', self.proposed_value, value, self.leader)
         if self.proposed_value is None:
             self.proposed_value = value
             
@@ -172,6 +173,7 @@ class Proposer (MessageHandler):
         self.proposal_id         = ProposalID(self.highest_proposal_id.number + 1, self.network_uid)
         self.highest_proposal_id = self.proposal_id
         self.current_prepare_msg = Prepare(self.network_uid, self.proposal_id)
+        print('paxos, prepare', self.current_prepare_msg)
 
         return self.current_prepare_msg
 
@@ -185,7 +187,7 @@ class Proposer (MessageHandler):
         This method is automatically called for all received Promise and Nack
         messages.
         '''
-        if (proposal_id!=None and self.highest_proposal_id==None) or proposal_id > self.highest_proposal_id:
+        if (proposal_id!=None and self.highest_proposal_id==None) or (proposal_id!=None and self.highest_proposal_id!=None and proposal_id > self.highest_proposal_id):
             self.highest_proposal_id = proposal_id
 
             
@@ -213,7 +215,7 @@ class Proposer (MessageHandler):
 
             self.promises_received.add( msg.from_uid )
 
-            if (msg.last_accepted_id!=None and self.highest_accepted_id==None) or msg.last_accepted_id > self.highest_accepted_id:
+            if (msg.last_accepted_id!=None and self.highest_accepted_id==None) or (msg.last_accepted_id!=None and self.highest_accepted_id!=None and msg.last_accepted_id > self.highest_accepted_id):
                 self.highest_accepted_id = msg.last_accepted_id
                 if msg.last_accepted_value is not None:
                     self.proposed_value = msg.last_accepted_value
