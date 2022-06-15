@@ -1,25 +1,20 @@
-# Course Project: Multi-paxos
-
-# 0. Introduction
-This repository contains the source code for our course project ("Concept and design of distributed system"). 
-We implement the toy paxos and multi-paxos supporting echo and kv.
-We refer to the implementation of [multi-paxos](https://github.com/cocagne/multi-paxos-example) for the basic part.
-
-
-# 1. How to use
-## Environment config
-### Step 1: conda environment
-```
+# Mult-Paxos
+This repository contains the Implementation for the graduate lesson *Concept and design of Distributed System* (2022 Spring, advised by Zhi Yang) in Peking University. We implement the Paxos, the Multi-Paxos Algorithm and a distributed database based on our Paxos consensus protocol.
+## Getting Start
+- Setup the conda environment.
+```bash
 conda env create -f multi-paxos.yaml
 ```
-### Step 2: gRPC
+- Autogen the Python code for `grpc` and `protobuf`
+```bash
+python -m grpc_tools.protoc -I ./ --python_out=./ --grpc_python_out=. ./phxkv.proto
 ```
-python -m grpc_tools.protoc -I ./ --python_out=./ --grpc_python_out=. ./kv.proto
-```
+If you finish running this command without error, you will see two new files `phxkv_pb2_grpc.py` and `phxkv_pb2.py` in the current directory.
+## Usage
 
-## Running
-### Basic Multi-paxos
-```
+### Echo Usage
+
+```bash
 # Running the server
 # Without master leases:
 python server.py A|B|C
@@ -29,12 +24,28 @@ python server.py --master A|B|C
 # Running the client
 python client.py A|B|C <value>
 ```
-### Echo
 
-### KV
+### Paxos-based Distributed Database
 
+- Setup the server A, B and C.
+```bash
+$ python kv_grpc_server_main.py --help
+usage: kv_grpc_server_main.py [-h] [--uid {A,B,C}] [--master]
 
-# 2. Content
+Paxos-based Distributed KV Store Server
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --uid {A,B,C}  UID of the server. Must be A, B, or C
+  --master       If specified, a dedicated master will be used. If one server
+                 specifies this flag, all must         
+```
+- Interact with the server.
+```bash
+python kv_grpc_client_cli.py
+```
+
+## Content 
 - **Basic multi-paxos**
     - **client.py** implements the client.
     - **server.py** implements the server.
@@ -45,4 +56,7 @@ python client.py A|B|C <value>
     - **resolution_strategy.py** ensures that a paxos instance will achieve resolution.
     - **sync_strategy.py** allows a server to send messages to a random peer periodically for synchronization.
     - **master_strategy.py** supports master leases.
-- **Echo and KV**
+
+## Reference
+
+- [multi-paxos](https://github.com/cocagne/multi-paxos-example): Example multi-paxos application for those learning Paxos & multi-paxos.
