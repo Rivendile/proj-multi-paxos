@@ -42,7 +42,24 @@ optional arguments:
 ```
 - Interact with the server.
 ```bash
-python kv_grpc_client_cli.py
+$ python kv_grpc_client_cli.py
+Welcome to the KV Client CLI.
+
+Available commands:
+  help                           - print this help message
+  q                              - quit
+  connect <UID>                  - connect the gRPC server by UID
+  disconnect                     - disconnect current gRPC server
+  get <key>                      - get the value of the key
+  put <key> <value>              - set the value of the key
+  delete <key>                   - delete the key
+
+Available Servers:
+  A: ('127.0.0.1', 50054)
+  B: ('127.0.0.1', 50055)
+  C: ('127.0.0.1', 50056)
+
+Please select a server via the command `connect <UID>` first.
 ```
 
 ## Content 
