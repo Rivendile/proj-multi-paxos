@@ -66,10 +66,8 @@ Please select a server via the command `connect <UID>` first.
     - **server.py** implements the server.
     - **config.py** contains required information, such as server IP, port, and path of state files.
     - **messenger.py** contains the message-passing strategy.
-    - **composable_paxos.py** contains the core paxos algorithm, including the paxos instance (proposer, accepter, and learner) and related message classes.
-    - **replicated_value.py** supports three functions: track and create PaxosInstance, link Messenger and PaxosInstance, and save and restore state.
-    - **resolution_strategy.py** ensures that a paxos instance will achieve resolution.
-    - **sync_strategy.py** allows a server to send messages to a random peer periodically for synchronization.
+    - **base_paxos.py** contains the core paxos algorithm, including the paxos instance (proposer, accepter, and learner) and related message classes.
+    - **enhanced_paxos.py** supports five functions: track and create PaxosInstance, link Messenger and PaxosInstance, save and restore state, prevent resolution collision, and synchronization.
     - **master_strategy.py** supports master leases.
 
 ## Reference
