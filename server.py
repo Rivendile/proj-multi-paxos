@@ -10,9 +10,8 @@ sys.path.append( os.path.dirname(this_dir) )
 
 import config
 
-from replicated_value    import BaseReplicatedValue
+from enhanced_paxos    import EnhancedPaxos
 from messenger           import Messenger
-from sync_strategy       import SimpleSynchronizationStrategyMixin
 from resolution_strategy import ExponentialBackoffResolutionStrategyMixin
 from master_strategy     import DedicatedMasterStrategyMixin
 
@@ -26,13 +25,13 @@ args = p.parse_args()
 
 if args.master:
 
-    class ReplicatedValue(DedicatedMasterStrategyMixin, ExponentialBackoffResolutionStrategyMixin, SimpleSynchronizationStrategyMixin, BaseReplicatedValue):
+    class ReplicatedValue(DedicatedMasterStrategyMixin, ExponentialBackoffResolutionStrategyMixin, EnhancedPaxos):
         '''
         Mixes the dedicated master, resolution, and synchronization strategies into the base class
         '''
 else:
     
-    class ReplicatedValue(ExponentialBackoffResolutionStrategyMixin, SimpleSynchronizationStrategyMixin, BaseReplicatedValue):
+    class ReplicatedValue(ExponentialBackoffResolutionStrategyMixin, EnhancedPaxos):
         '''
         Mixes just the resolution and synchronization strategies into the base class
         '''

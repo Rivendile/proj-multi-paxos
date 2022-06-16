@@ -1,9 +1,8 @@
 import logging
-from replicated_value import BaseReplicatedValue
+from enhanced_paxos import EnhancedPaxos
 from kv_sm import KVSM
 from master_strategy import DedicatedMasterStrategyMixin
 from resolution_strategy import ExponentialBackoffResolutionStrategyMixin
-from sync_strategy import SimpleSynchronizationStrategyMixin
 from messenger import Messenger
 from utils.concurrent import PThread
 from twisted.internet import reactor
@@ -47,8 +46,7 @@ class PhxKV(object):
             class ReplicatedValue(
                 DedicatedMasterStrategyMixin,
                 ExponentialBackoffResolutionStrategyMixin,
-                SimpleSynchronizationStrategyMixin,
-                BaseReplicatedValue,
+                EnhancedPaxos
             ):
                 """
                 Mixes the dedicated master, resolution, and synchronization strategies into the base class
@@ -58,8 +56,7 @@ class PhxKV(object):
 
             class ReplicatedValue(
                 ExponentialBackoffResolutionStrategyMixin,
-                SimpleSynchronizationStrategyMixin,
-                BaseReplicatedValue,
+                EnhancedPaxos
             ):
                 """
                 Mixes just the resolution and synchronization strategies into the base class

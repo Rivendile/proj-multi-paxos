@@ -8,7 +8,7 @@ import time
 
 from twisted.internet import reactor, defer, task
 
-from composable_paxos import ProposalID, Prepare, Promise
+from base_paxos import ProposalID, Prepare, Promise
 
 
         

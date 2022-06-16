@@ -6,7 +6,7 @@ import json
 
 from twisted.internet import reactor, protocol
 
-from composable_paxos import ProposalID
+from base_paxos import ProposalID
 
 
 class Messenger(protocol.DatagramProtocol):

@@ -1,5 +1,6 @@
 name: multi-paxos
 channels:
+  - conda-forge
   - anaconda
   - defaults
 dependencies:
@@ -18,6 +19,7 @@ dependencies:
   - idna=3.3=pyhd3eb1b0_0
   - incremental=21.3.0=pyhd3eb1b0_0
   - ld_impl_linux-64=2.38=h1181459_1
+  - leveldb=1.20=hf484d3e_1
   - libffi=3.3=he6710b0_2
   - libgcc-ng=11.2.0=h1234567_1
   - libgomp=11.2.0=h1234567_1
@@ -31,10 +33,13 @@ dependencies:
   - pyhamcrest=2.0.2=pyhd3eb1b0_2
   - pyopenssl=22.0.0=pyhd3eb1b0_0
   - python=3.9.12=h12debd9_1
+  - python-leveldb=0.201=py39h2531618_0
+  - python_abi=3.9=2_cp39
   - readline=8.1.2=h7f8727e_1
   - service_identity=18.1.0=pyhd3eb1b0_1
   - setuptools=61.2.0=py39h06a4308_0
   - six=1.16.0=pyhd3eb1b0_1
+  - snappy=1.1.9=hbd366e4_1
   - sqlite=3.38.3=hc218d9a_0
   - tk=8.6.12=h1ccaba5_0
   - twisted=22.2.0=py39h7f8727e_0
@@ -45,4 +50,8 @@ dependencies:
   - zlib=1.2.12=h7f8727e_2
   - zope=1.0=py39h06a4308_1
   - zope.interface=5.4.0=py39h7f8727e_0
+  - pip:
+    - grpcio==1.46.3
+    - grpcio-tools==1.46.3
+    - protobuf==3.20.1
 prefix: /home/yihaozhao/anaconda3/envs/multi-paxos

@@ -15,10 +15,12 @@ import os
 import json
 import os.path
 from sm import StateMachine
+import random
+from twisted.internet import task
 
-from composable_paxos import PaxosInstance, ProposalID, Prepare, Nack, Promise, Accept, Accepted, Resolution
+from base_paxos import PaxosInstance, ProposalID, Prepare, Nack, Promise, Accept, Accepted, Resolution
 
-class BaseReplicatedValue (object):
+class EnhancedPaxos (object):
 
     def __init__(self, network_uid, peers, state_file, sm : StateMachine=None):
         self.messenger = None
@@ -27,6 +29,7 @@ class BaseReplicatedValue (object):
         self.quorum_size = int(len(peers)/2) + 1
         self.state_file = state_file
         self.sm = sm
+        self.sync_delay = 10.0
 
         self.load_state()
 
@@ -176,3 +179,22 @@ class BaseReplicatedValue (object):
 
         if isinstance(m, Resolution):
             self.advance_instance(self.instance_number + 1, proposal_value)
+
+    # for synchronization
+    def set_messenger(self, messenger):
+        self.messenger = messenger
+
+        def sync():
+            self.messenger.send_sync_request(random.choice(list(self.peers)), self.instance_number)
+                
+        self.sync_task = task.LoopingCall(sync)
+        self.sync_task.start(self.sync_delay)
+    
+    def receive_sync_request(self, from_uid, instance_number):
+        if instance_number < self.instance_number:
+            self.messenger.send_catchup(from_uid, self.instance_number, self.current_value)
+
+    def receive_catchup(self, from_uid, instance_number, current_value):
+        if instance_number > self.instance_number:
+            print('SYNCHRONIZED: ', instance_number, current_value)
+            self.advance_instance(instance_number, current_value, catchup=True)
