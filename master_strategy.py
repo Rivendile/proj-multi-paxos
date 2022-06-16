@@ -11,7 +11,7 @@ from twisted.internet import reactor, defer, task
 from base_paxos import ProposalID, Prepare, Promise
 
 
-        
+
 class DedicatedMasterStrategyMixin (object):
 
     lease_window   = 10.0  # seconds

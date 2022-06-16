@@ -115,7 +115,7 @@ while True:
                 sys.stdout.write(f"Error: {status}\n")
 
         elif command == "delete":
-            key = cmd.split()[1:]
+            key = cmd.split()[1]
             if current_uid is None:
                 sys.stdout.write("Please connect to a server.\n")
                 continue

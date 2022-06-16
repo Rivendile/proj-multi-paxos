@@ -6,17 +6,17 @@
 #    * Bridging the composable_paxos.PaxosInstance object for the current link
 #      in the multi-paoxs chain with the Messenger object used to send and
 #      receive messages over the network.
-#
-# In order to provide clean separation-of-concerns, this class is completely
-# passive. Active operations like the logic used to ensure that resolution
-# is achieved and catching up after falling behind are left to Mixin classes.
+#    * Supporting synchronization among peers.
+#    * Preventing continual collisions between peers attempting to drive a
+#      Paxos instance to resolution.
+
 
 import os
 import json
 import os.path
 from sm import StateMachine
 import random
-from twisted.internet import task
+from twisted.internet import reactor, defer, task
 
 from base_paxos import PaxosInstance, ProposalID, Prepare, Nack, Promise, Accept, Accepted, Resolution
 
@@ -29,7 +29,18 @@ class EnhancedPaxos (object):
         self.quorum_size = int(len(peers)/2) + 1
         self.state_file = state_file
         self.sm = sm
+
+        # for synchronization
         self.sync_delay = 10.0
+
+        # for resolution
+        self.backoff_initial = 5
+        self.retransmit_interval = 1000
+        self.retransmit_task = None
+        self.backoff_cap = 2000 
+        self.backoff_window = self.backoff_initial
+        self.drive_silence_timeout = 3000 
+        self.delayed_drive = None
 
         self.load_state()
 
@@ -37,9 +48,7 @@ class EnhancedPaxos (object):
                                    self.promised_id, self.accepted_id,
                                    self.accepted_value)
 
-    def set_messenger(self, messenger):
-        self.messenger = messenger
-
+    # log state
     def save_state(self, instance_number, current_value, promised_id, accepted_id, accepted_value):
         '''
         For crash recovery purposes, Paxos requires that some state be saved to
@@ -92,6 +101,50 @@ class EnhancedPaxos (object):
             self.accepted_id = to_pid(m['accepted_id'])
             self.accepted_value = m['accepted_value']
 
+    # for synchronization
+    def set_messenger(self, messenger):
+        self.messenger = messenger
+
+        def sync():
+            self.messenger.send_sync_request(random.choice(list(self.peers)), self.instance_number)
+                
+        self.sync_task = task.LoopingCall(sync)
+        self.sync_task.start(self.sync_delay)
+    
+    def receive_sync_request(self, from_uid, instance_number):
+        if instance_number < self.instance_number:
+            self.messenger.send_catchup(from_uid, self.instance_number, self.current_value)
+
+    def receive_catchup(self, from_uid, instance_number, current_value):
+        if instance_number > self.instance_number:
+            print('SYNCHRONIZED: ', instance_number, current_value)
+            self.advance_instance(instance_number, current_value, catchup=True)
+
+    # for resolution
+    def reschedule_next_drive_attempt(self, delay):
+        if self.delayed_drive is not None and self.delayed_drive.active():
+            self.delayed_drive.cancel()
+            
+        self.delayed_drive = reactor.callLater(delay, self.drive_to_resolution)
+    
+    def drive_to_resolution(self):
+        self.stop_driving()
+        
+        m = self.paxos.prepare() # Advances to the next proposal number
+
+        self.retransmit_task = task.LoopingCall( lambda : self.send_prepare(m.proposal_id) )
+        self.retransmit_task.start( self.retransmit_interval/1000.0, now=True )
+     
+    def stop_driving(self):
+        
+        if self.retransmit_task is not None:
+            self.retransmit_task.stop()
+            self.retransmit_task = None
+
+        if self.delayed_drive is not None and self.delayed_drive.active():
+            self.delayed_drive.cancel()
+
+    # paxos
     def propose_update(self, new_value):
         """
         This is a key method that some of the mixin classes override in order
@@ -100,6 +153,8 @@ class EnhancedPaxos (object):
         # print('replicated value, propose_update', self.paxos.proposed_value, new_value)
         if self.paxos.proposed_value is None:
             self.paxos.propose_value(new_value)
+        
+        self.drive_to_resolution()
 
     def advance_instance(self, new_instance_number, new_current_value, catchup=False):
         self.save_state(new_instance_number, new_current_value, None, None, None)
@@ -110,13 +165,24 @@ class EnhancedPaxos (object):
         # print('UPDATED: ', new_instance_number, new_current_value)
         print(f"UPDATED: {new_instance_number}")
 
+        self.stop_driving()
+        self.backoff_window = self.backoff_initial
+
     def send_prepare(self, proposal_id):
         for uid in self.peers:
             self.messenger.send_prepare(uid, self.instance_number, proposal_id)
 
+    
     def send_accept(self, proposal_id, proposal_value):
-        for uid in self.peers:
-            self.messenger.send_accept(uid, self.instance_number, proposal_id, proposal_value)
+        if self.retransmit_task is not None:
+            self.retransmit_task.stop()
+        
+        def func_send_accept(proposal_id, proposal_value):
+            for uid in self.peers:
+                self.messenger.send_accept(uid, self.instance_number, proposal_id, proposal_value)
+
+        self.retransmit_task = task.LoopingCall(func_send_accept, proposal_id, proposal_value)
+        self.retransmit_task.start( self.retransmit_interval, now=True ) 
 
     def send_accepted(self, proposal_id, proposal_value):
         for uid in self.peers:
@@ -145,6 +211,15 @@ class EnhancedPaxos (object):
 
         self.paxos.receive_nack(Nack(from_uid, self.network_uid, proposal_id, promised_proposal_id))
 
+        self.stop_driving()
+        
+        self.backoff_window = self.backoff_window * 2
+        
+        if self.backoff_window > self.backoff_cap:
+            self.backoff_window = self.backoff_cap
+
+        self.reschedule_next_drive_attempt( (self.backoff_window * random.random())/1000.0 )
+
     def receive_promise(self, from_uid, instance_number, proposal_id, last_accepted_id, last_accepted_value):
         # Only process messages for the current link in the multi-paxos chain
         if instance_number != self.instance_number:
@@ -170,6 +245,8 @@ class EnhancedPaxos (object):
         else:
             self.messenger.send_nack(from_uid, self.instance_number, proposal_id, self.promised_id)
 
+        self.reschedule_next_drive_attempt( self.drive_silence_timeout/1000.0 )
+
     def receive_accepted(self, from_uid, instance_number, proposal_id, proposal_value):
         # Only process messages for the current link in the multi-paxos chain
         if instance_number != self.instance_number:
@@ -179,22 +256,3 @@ class EnhancedPaxos (object):
 
         if isinstance(m, Resolution):
             self.advance_instance(self.instance_number + 1, proposal_value)
-
-    # for synchronization
-    def set_messenger(self, messenger):
-        self.messenger = messenger
-
-        def sync():
-            self.messenger.send_sync_request(random.choice(list(self.peers)), self.instance_number)
-                
-        self.sync_task = task.LoopingCall(sync)
-        self.sync_task.start(self.sync_delay)
-    
-    def receive_sync_request(self, from_uid, instance_number):
-        if instance_number < self.instance_number:
-            self.messenger.send_catchup(from_uid, self.instance_number, self.current_value)
-
-    def receive_catchup(self, from_uid, instance_number, current_value):
-        if instance_number > self.instance_number:
-            print('SYNCHRONIZED: ', instance_number, current_value)
-            self.advance_instance(instance_number, current_value, catchup=True)

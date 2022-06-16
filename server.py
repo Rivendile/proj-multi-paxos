@@ -12,7 +12,6 @@ import config
 
 from enhanced_paxos    import EnhancedPaxos
 from messenger           import Messenger
-from resolution_strategy import ExponentialBackoffResolutionStrategyMixin
 from master_strategy     import DedicatedMasterStrategyMixin
 
 
@@ -25,15 +24,15 @@ args = p.parse_args()
 
 if args.master:
 
-    class ReplicatedValue(DedicatedMasterStrategyMixin, ExponentialBackoffResolutionStrategyMixin, EnhancedPaxos):
+    class ReplicatedValue(DedicatedMasterStrategyMixin, EnhancedPaxos):
         '''
-        Mixes the dedicated master, resolution, and synchronization strategies into the base class
+        Mixes the dedicated master strategies into the enhanced paxos class
         '''
 else:
     
-    class ReplicatedValue(ExponentialBackoffResolutionStrategyMixin, EnhancedPaxos):
+    class ReplicatedValue(EnhancedPaxos):
         '''
-        Mixes just the resolution and synchronization strategies into the base class
+        Use the enhanced paxos class
         '''
 
 
