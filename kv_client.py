@@ -75,9 +75,9 @@ class KVClient(object):
         if eRet != KVClientRet.OK and eRet != KVClientRet.KEY_NOTEXIST:
             return eRet
         try:
-            self.oLevelDB.delete(sKey.encode())
+            self.oLevelDB.Delete(sKey.encode())
         except Exception as e:
-            logger.error(f"LevelDB.Put fail, key {sKey}, err {e}")
+            logger.error(f"LevelDB.Delete fail, key {sKey}, err {e}")
             return KVClientRet.SYS_FAIL
         logger.info(f"Del OK, key {sKey}, value {bServerValue}")
         return KVClientRet.OK
